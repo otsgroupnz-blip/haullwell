@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0058)file:///C:/Users/brayden/Downloads/truckit-test-app_7.html -->
+<!-- saved from url=(0058)file:///C:/Users/brayden/Downloads/truckit-test-app_9.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -128,18 +128,60 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
 
     <p class="sub" style="margin-top:16px">What are you moving?</p>
     <select class="msel" id="machine">
-      <option value="Excavator / digger" selected="">Excavator / digger</option>
-      <option value="Bulldozer">Bulldozer</option>
-      <option value="Grader">Grader</option>
-      <option value="Roller / compactor">Roller / compactor</option>
-      <option value="Skid steer / bobcat">Skid steer / bobcat</option>
-      <option value="Telehandler">Telehandler</option>
-      <option value="Forklift">Forklift</option>
-      <option value="Tractor / ag gear">Tractor / ag gear</option>
-      <option value="Scissor lift / EWP">Scissor lift / EWP</option>
-      <option value="Truck / heavy vehicle">Truck / heavy vehicle</option>
-      <option value="Container / portable building">Container / portable building</option>
-      <option value="Other machinery">Other machinery</option>
+      <optgroup label="Earthmoving">
+        <option value="Excavator / digger" selected="">Excavator / digger</option>
+        <option value="Mini excavator (under 4 t)">Mini excavator (under 4 t)</option>
+        <option value="Bulldozer">Bulldozer</option>
+        <option value="Wheel loader / loader">Wheel loader / loader</option>
+        <option value="Skid steer / bobcat">Skid steer / bobcat</option>
+        <option value="Grader">Grader</option>
+        <option value="Dumper / dump truck">Dumper / dump truck</option>
+        <option value="Trencher">Trencher</option>
+        <option value="Water cart / dust suppression tank">Water cart / dust suppression tank</option>
+      </optgroup>
+      <optgroup label="Compaction">
+        <option value="Smooth drum roller">Smooth drum roller</option>
+        <option value="Padfoot roller">Padfoot roller</option>
+        <option value="Double drum roller">Double drum roller</option>
+      </optgroup>
+      <optgroup label="Access / EWP">
+        <option value="Scissor lift">Scissor lift</option>
+        <option value="Knuckle boom lift">Knuckle boom lift</option>
+        <option value="Telescopic boom lift">Telescopic boom lift</option>
+        <option value="Cherry picker (towable)">Cherry picker (towable)</option>
+        <option value="Mast / personnel lift">Mast / personnel lift</option>
+      </optgroup>
+      <optgroup label="Lift &amp; shift">
+        <option value="Forklift">Forklift</option>
+        <option value="Telehandler">Telehandler</option>
+      </optgroup>
+      <optgroup label="Agriculture">
+        <option value="Tractor">Tractor</option>
+        <option value="Tractor + implement / attachment">Tractor + implement / attachment</option>
+        <option value="Other ag machinery">Other ag machinery</option>
+      </optgroup>
+      <optgroup label="Site power &amp; equipment">
+        <option value="Generator (large / three phase)">Generator (large / three phase)</option>
+        <option value="Lighting tower">Lighting tower</option>
+        <option value="Air compressor (towable)">Air compressor (towable)</option>
+        <option value="Pump / dewatering unit">Pump / dewatering unit</option>
+      </optgroup>
+      <optgroup label="Portable buildings">
+        <option value="Shipping container">Shipping container</option>
+        <option value="Site office / portacom">Site office / portacom</option>
+        <option value="Lunchroom / ablution block">Lunchroom / ablution block</option>
+        <option value="Portaloo(s)">Portaloo(s)</option>
+      </optgroup>
+      <optgroup label="Vehicles">
+        <option value="Car / ute / van">Car / ute / van</option>
+        <option value="Truck / heavy vehicle">Truck / heavy vehicle</option>
+        <option value="Bus / motorhome">Bus / motorhome</option>
+        <option value="Trailer / caravan">Trailer / caravan</option>
+        <option value="Boat on trailer">Boat on trailer</option>
+      </optgroup>
+      <optgroup label="Other">
+        <option value="Other machinery">Other machinery</option>
+      </optgroup>
     </select>
     <p class="sub" style="margin-top:14px">Extras going with it</p>
     <div class="chips" id="extras">
@@ -501,63 +543,4 @@ async function sendBooking(payload){
     return r.ok;
   }catch(e){return false;}
 }
-$("bookbtn").addEventListener("click",async()=>{
-  const q=quote();
-  const btn=$("bookbtn");
-  if(!q&&!manualMode)return;
-
-  if(!detailsOpen){
-    detailsOpen=true;
-    $("dform").classList.add("show");
-    btn.textContent=manualMode?"Send quote request":"Confirm booking";
-    $("dform").scrollIntoView({behavior:"smooth",block:"start"});
-    return;
-  }
-
-  const okN=fieldOk("c-name"),okP=fieldOk("c-phone"),okE=fieldOk("c-email");
-  if(!okN||!okP||!okE)return;
-
-  const w=+$("wt").value;
-  const payload={
-    _subject:(manualMode?"QUOTE REQUEST":"BOOKING")+" — "+machineName()+" · "+$("from").value+" → "+$("to").value,
-    type:manualMode?"Manual quote request":"Instant booking",
-    name:$("c-name").value.trim(),
-    phone:$("c-phone").value.trim(),
-    email:$("c-email").value.trim(),
-    machine:machineName(),
-    extras:extrasList().join(", ")||"None",
-    weight:(w%1?w.toFixed(1):w)+" t",
-    pickup:$("from").value,
-    dropoff:$("to").value,
-    zones:$("zonepill").textContent,
-    price:q?("$"+q.p.toFixed(2)+" +GST ("+CATS[q.ci].lbl+")"):"POA — manual quote",
-    notes:$("c-notes").value.trim()||"None"
-  };
-  btn.textContent="Sending…";
-  const sent=await sendBooking(payload);
-  if(!sent){
-    const body="New "+payload.type+"%0A%0A"+Object.entries(payload).filter(([k])=>k!=="_subject").map(([k,v])=>k+": "+v).join("%0A");
-    location.href="mailto:"+BOOK_EMAIL+"?subject="+encodeURIComponent(payload._subject)+"&body="+body;
-  }
-  const route=($("from").value.split(",")[0]||"Pickup")+" → "+($("to").value.split(",")[0]||"Dropoff");
-  if(manualMode){
-    btn.textContent="Quote request sent — we'll be in touch";
-    btn.style.background="#854F0B";
-    setTimeout(()=>{quote();btn.style.background="";$("dform").classList.remove("show");detailsOpen=false;},2200);
-    return;
-  }
-  lastQuote="$"+q.p.toFixed(2);
-  lastRoute=route;
-  $("tk-title").textContent=machineName().split(" /")[0]+" · "+payload.weight;
-  $("tk-route").textContent=route;
-  $("track-empty").style.display="none";
-  $("track-live").style.display="block";
-  stage=0;paintTrack();
-  btn.textContent="Booked";btn.style.background="#0F6E56";
-  setTimeout(()=>{quote();btn.textContent="Book transport";btn.style.background="";$("dform").classList.remove("show");detailsOpen=false;show("track");},900);
-});
-quote();
-</script>
-
-
-</body></html>
+$("bookbtn").addEventListener("click",async()
