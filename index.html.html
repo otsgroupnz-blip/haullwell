@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<!-- saved from url=(0058)file:///C:/Users/brayden/Downloads/truckit-test-app_7.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>TruckIt — test app</title>
+<link rel="stylesheet" href="./index.html_files/tabler-icons.min.css">
+<style>
+:root{
+  --red:#A32D2D; --red-dark:#791F1F; --red-deep:#501313; --red-tint:#FCEBEB;
+  --teal-tint:#E1F5EE; --teal-dark:#085041;
+  --amber-tint:#FAEEDA; --amber-dark:#633806;
+  --blue-tint:#E6F1FB; --blue-dark:#0C447C;
+  --ink:#1c1c1a; --ink-2:#5f5e5a; --ink-3:#8a8983;
+  --line:rgba(0,0,0,0.10); --line-strong:rgba(0,0,0,0.18);
+  --card:#ffffff; --page:#f3f1ec;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  background:var(--page); color:var(--ink);
+  display:flex; flex-direction:column;
+  min-height:100dvh;
+  padding-top:env(safe-area-inset-top);
+}
+.app{flex:1;display:flex;flex-direction:column;max-width:480px;width:100%;margin:0 auto;background:var(--card);}
+.screen{flex:1;padding:18px 18px 12px;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.screen.on{display:block}
+h1{font-size:22px;font-weight:600;margin:0}
+.sub{font-size:13px;color:var(--ink-2);margin:0}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+select.msel{width:100%;margin-top:8px;padding:13px 14px;font-size:15px;font-family:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line-strong);border-radius:14px;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 14px center}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{border:1px solid var(--line-strong);border-radius:20px;padding:8px 14px;font-size:13.5px;color:var(--ink-2);cursor:pointer;user-select:none}
+.chip.on{background:var(--red-tint);border-color:var(--red);color:var(--red-deep);font-weight:600}
+.dform{display:none;margin-top:14px}
+.dform.show{display:block}
+.frow{margin-top:10px}
+.frow label{display:block;font-size:12px;color:var(--ink-3);margin-bottom:4px}
+.frow input,.frow textarea{width:100%;padding:12px 14px;font-size:15px;font-family:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line-strong);border-radius:12px;outline:none}
+.frow input.err,.frow textarea.err{border-color:var(--red)}
+.frow textarea{resize:none;height:64px}
+.mtile{border:1px solid var(--line);border-radius:14px;padding:14px 12px;cursor:pointer;background:var(--card)}
+.mtile i{font-size:24px;color:var(--ink-2)}
+.mtile p{margin:6px 0 0;font-size:13.5px;color:var(--ink-2)}
+.mtile.on{border:2px solid var(--red);background:var(--red-tint);padding:13px 11px}
+.mtile.on i{color:var(--red-dark)}
+.mtile.on p{color:var(--red-deep);font-weight:600}
+.addr{border:1px solid var(--line);border-radius:14px;padding:2px 14px;margin-top:14px}
+.arow{display:flex;align-items:center;gap:12px;padding:12px 0}
+.arow+.arow{border-top:1px solid var(--line)}
+.arow i{font-size:18px}
+.arow .lbl{font-size:11px;color:var(--ink-3);margin:0}
+.arow input{border:none;outline:none;font-size:15px;color:var(--ink);width:100%;padding:0;background:transparent;font-family:inherit}
+.awrap{position:relative;flex:1}
+.sug{position:absolute;left:-14px;right:-14px;top:calc(100% + 8px);background:var(--card);border:1px solid var(--line-strong);border-radius:12px;z-index:50;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.14);display:none}
+.sug div{padding:12px 14px;font-size:14px;cursor:pointer;border-bottom:1px solid var(--line)}
+.sug div:last-child{border-bottom:none}
+.sug div:active{background:var(--page)}
+.sug .s2{display:block;font-size:11.5px;color:var(--ink-3);margin-top:1px}
+.autokm{font-size:11px;color:var(--teal-dark);background:var(--teal-tint);border-radius:8px;padding:2px 8px;margin-left:6px;font-weight:600;display:none}
+.sliders{margin-top:16px}
+.srow{display:flex;align-items:center;gap:12px;margin-top:10px}
+.srow label{font-size:13.5px;color:var(--ink-2);min-width:58px}
+.srow output{font-size:13.5px;font-weight:600;min-width:44px;text-align:right}
+input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:4px;background:var(--line-strong);border-radius:2px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--card);border:1.5px solid var(--line-strong);box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.quote{border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;margin-top:16px}
+.quote .q1{margin:0;font-size:12.5px;color:var(--ink-2)}
+.quote .q2{margin:3px 0 0;font-size:26px;font-weight:600}
+.quote .gst{font-size:12px;font-weight:400;color:var(--ink-3)}
+.pill{font-size:11.5px;font-weight:600;padding:5px 11px;border-radius:11px;white-space:nowrap}
+.pill.teal{background:var(--teal-tint);color:var(--teal-dark)}
+.pill.amber{background:var(--amber-tint);color:var(--amber-dark)}
+.pill.blue{background:var(--blue-tint);color:var(--blue-dark)}
+.cta{background:var(--red);color:var(--red-tint);text-align:center;font-size:16px;font-weight:600;padding:16px;border-radius:16px;margin-top:14px;cursor:pointer;border:none;width:100%;font-family:inherit;transition:background .25s}
+.cta:active{transform:scale(0.985)}
+.card{border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:12px}
+.empty{text-align:center;padding:38px 16px}
+.empty i{font-size:30px;color:var(--ink-3)}
+.empty h3{margin:8px 0 3px;font-size:15px;font-weight:600}
+.empty p{margin:0;font-size:13.5px;color:var(--ink-2)}
+.bar{height:7px;background:var(--page);border-radius:4px;margin:14px 0 4px;overflow:hidden}
+.bar div{height:100%;width:5%;background:var(--red);border-radius:4px;transition:width .8s}
+.step{display:flex;gap:12px;align-items:flex-start;padding:9px 2px;opacity:.5;transition:opacity .3s}
+.step.done{opacity:1}
+.step i{font-size:18px;color:var(--ink-3);margin-top:1px}
+.step.done i{color:var(--red)}
+.step h4{margin:0;font-size:14px;font-weight:600}
+.step p{margin:2px 0 0;font-size:12.5px;color:var(--ink-2)}
+.ghost{width:100%;margin-top:10px;padding:13px;border:1px solid var(--line-strong);background:transparent;border-radius:14px;font-size:14.5px;font-family:inherit;color:var(--ink);cursor:pointer}
+.jrow{display:flex;justify-content:space-between;align-items:center;padding:13px 2px;border-bottom:1px solid var(--line);gap:10px}
+.jrow:last-child{border-bottom:none}
+.jrow h4{margin:0;font-size:13.5px;font-weight:600}
+.jrow p{margin:2px 0 0;font-size:12.5px;color:var(--ink-2)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.stat{background:var(--page);border-radius:12px;padding:12px 14px}
+.stat p{margin:0;font-size:11.5px;color:var(--ink-3)}
+.stat h3{margin:3px 0 0;font-size:17px;font-weight:600}
+.avatar{width:46px;height:46px;border-radius:50%;background:var(--red-tint);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:var(--red-dark);flex-shrink:0}
+.nav{display:flex;border-top:1px solid var(--line);padding:8px 8px calc(10px + env(safe-area-inset-bottom));background:var(--card)}
+.navb{flex:1;text-align:center;color:var(--ink-3);cursor:pointer;padding:6px 0}
+.navb i{font-size:22px}
+.navb p{margin:2px 0 0;font-size:11px}
+.navb.on{color:var(--red)}
+.navb.on p{font-weight:600}
+@media (prefers-color-scheme: dark){
+  :root{--ink:#efeeea;--ink-2:#b3b1aa;--ink-3:#84837d;--line:rgba(255,255,255,0.14);--line-strong:rgba(255,255,255,0.25);--card:#1d1d1b;--page:#141412;
+  --red-tint:#3a1414;--teal-tint:#0d2e25;--teal-dark:#9FE1CB;--amber-tint:#332208;--amber-dark:#FAC775;--blue-tint:#0e2338;--blue-dark:#B5D4F4;--red-dark:#F09595;--red-deep:#F7C1C1}
+  input[type=range]::-webkit-slider-thumb{background:#2c2c29}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="screen on" id="scr-book">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <p class="sub">Gidday, Bray</p>
+        <h1>Move some gear</h1>
+      </div>
+      <div class="avatar">BH</div>
+    </div>
+
+    <p class="sub" style="margin-top:16px">What are you moving?</p>
+    <select class="msel" id="machine">
+      <option value="Excavator / digger" selected="">Excavator / digger</option>
+      <option value="Bulldozer">Bulldozer</option>
+      <option value="Grader">Grader</option>
+      <option value="Roller / compactor">Roller / compactor</option>
+      <option value="Skid steer / bobcat">Skid steer / bobcat</option>
+      <option value="Telehandler">Telehandler</option>
+      <option value="Forklift">Forklift</option>
+      <option value="Tractor / ag gear">Tractor / ag gear</option>
+      <option value="Scissor lift / EWP">Scissor lift / EWP</option>
+      <option value="Truck / heavy vehicle">Truck / heavy vehicle</option>
+      <option value="Container / portable building">Container / portable building</option>
+      <option value="Other machinery">Other machinery</option>
+    </select>
+    <p class="sub" style="margin-top:14px">Extras going with it</p>
+    <div class="chips" id="extras">
+      <span class="chip">Bucket(s)</span>
+      <span class="chip">Breaker / hammer</span>
+      <span class="chip">Auger</span>
+      <span class="chip">Forks / attachments</span>
+      <span class="chip">Blade</span>
+      <span class="chip">Other</span>
+    </div>
+
+    <div class="addr">
+      <div class="arow">
+        <i class="ti ti-circle-dot" style="color:var(--red)"></i>
+        <div class="awrap">
+          <p class="lbl">Pickup</p>
+          <input id="from" value="94 Gavin St, Mt Wellington" autocomplete="off" placeholder="Start typing an address">
+          <div class="sug" id="sug-from"></div>
+        </div>
+      </div>
+      <div class="arow">
+        <i class="ti ti-map-pin" style="color:var(--ink-2)"></i>
+        <div class="awrap">
+          <p class="lbl">Dropoff</p>
+          <input id="to" value="Drury South, Auckland" autocomplete="off" placeholder="Start typing an address">
+          <div class="sug" id="sug-to"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sliders">
+      <div class="srow">
+        <label for="wt">Weight</label>
+        <input type="range" id="wt" min="0.5" max="26" step="0.5" value="14">
+        <output id="wt-out">14 t</output>
+      </div>
+      <p class="sub" id="route-info" style="margin-top:10px;display:none"></p>
+    </div>
+
+    <div class="quote">
+      <div>
+        <p class="q1" id="qmeta">Instant quote · Cat 4 · 12.1–22 t</p>
+        <p class="q2"><span id="price">$543.42</span> <span class="gst" id="gstlbl" style="display: inline;">+GST</span></p>
+        <p class="q1" id="qnote" style="margin-top:3px;display:none"></p>
+      </div>
+      <span class="pill teal" id="zonepill" style="display: inline-block;">Zone 1 → 2</span>
+    </div>
+
+    <div class="dform" id="dform">
+      <p class="sub" style="margin-top:2px">Your details</p>
+      <div class="frow"><label for="c-name">Name</label><input id="c-name" placeholder="Dave Matthews" autocomplete="name"></div>
+      <div class="frow"><label for="c-phone">Phone</label><input id="c-phone" type="tel" placeholder="021 123 4567" autocomplete="tel"></div>
+      <div class="frow"><label for="c-email">Email</label><input id="c-email" type="email" placeholder="dave@company.co.nz" autocomplete="email"></div>
+      <div class="frow"><label for="c-notes">Anything else we should know</label><textarea id="c-notes" placeholder="Site access, timing, machine model…"></textarea></div>
+    </div>
+
+    <button class="cta" id="bookbtn">Book transport</button>
+  </div>
+
+  <div class="screen" id="scr-track">
+    <h1>Track your job</h1>
+    <div class="card empty" id="track-empty">
+      <i class="ti ti-truck"></i>
+      <h3>No active jobs</h3>
+      <p>Book transport to see live tracking here.</p>
+    </div>
+    <div id="track-live" style="display:none">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+          <div>
+            <h4 style="margin:0;font-size:14.5px;font-weight:600" id="tk-title">Excavator · 14 t</h4>
+            <p class="sub" id="tk-route" style="margin-top:2px">Mt Wellington → Drury South</p>
+          </div>
+          <span class="pill amber" id="tk-badge">Finding truck</span>
+        </div>
+        <div class="bar"><div id="tk-bar"></div></div>
+      </div>
+      <div style="margin-top:12px" id="tk-steps">
+        <div class="step done" data-s="0"><i class="ti ti-search"></i><div><h4>Matching operator</h4><p>Offering to nearby low loaders</p></div></div>
+        <div class="step" data-s="1"><i class="ti ti-user-check"></i><div><h4>Operator accepted</h4><p>Dave M · 4.9 ★ · Kenworth low loader</p></div></div>
+        <div class="step" data-s="2"><i class="ti ti-crane"></i><div><h4>Loading on site</h4><p>Photos added to job record</p></div></div>
+        <div class="step" data-s="3"><i class="ti ti-truck"></i><div><h4>In transit</h4><p>ETA 45 min · SH1 southbound</p></div></div>
+        <div class="step" data-s="4"><i class="ti ti-check"></i><div><h4>Delivered</h4><p>POD signed and emailed</p></div></div>
+      </div>
+      <button class="ghost" id="tk-adv">Simulate next update</button>
+    </div>
+  </div>
+
+  <div class="screen" id="scr-jobs">
+    <h1>Your jobs</h1>
+    <div style="margin-top:8px" id="jobs-list">
+      <div class="jrow"><div><h4>20 t excavator · East Tamaki → Pukekohe</h4><p>3 Jul · $940 +GST</p></div><span class="pill teal">Done</span></div>
+      <div class="jrow"><div><h4>Telehandler · Penrose → Albany</h4><p>28 Jun · $520 +GST</p></div><span class="pill teal">Done</span></div>
+      <div class="jrow"><div><h4>Roller · Onehunga → Hamilton</h4><p>21 Jun · $1,180 +GST</p></div><span class="pill teal">Done</span></div>
+    </div>
+  </div>
+
+  <div class="screen" id="scr-acct">
+    <h1>Account</h1>
+    <div class="card" style="display:flex;align-items:center;gap:12px">
+      <div class="avatar">BH</div>
+      <div>
+        <h4 style="margin:0;font-size:15px;font-weight:600">Brayden Howell</h4>
+        <p class="sub" style="margin-top:2px">Business account · on credit terms</p>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><p>Jobs this month</p><h3 id="st-jobs">4</h3></div>
+      <div class="stat"><p>Spend this month</p><h3 id="st-spend">$3,388</h3></div>
+    </div>
+    <div style="margin-top:12px">
+      <div class="jrow"><span style="font-size:14.5px"><i class="ti ti-credit-card" style="font-size:18px;vertical-align:-3px;margin-right:10px;color:var(--ink-2)"></i>Payment methods</span><i class="ti ti-chevron-right" style="font-size:17px;color:var(--ink-3)"></i></div>
+      <div class="jrow"><span style="font-size:14.5px"><i class="ti ti-file-invoice" style="font-size:18px;vertical-align:-3px;margin-right:10px;color:var(--ink-2)"></i>Invoices and PODs</span><i class="ti ti-chevron-right" style="font-size:17px;color:var(--ink-3)"></i></div>
+      <div class="jrow"><span style="font-size:14.5px"><i class="ti ti-headset" style="font-size:18px;vertical-align:-3px;margin-right:10px;color:var(--ink-2)"></i>Support</span><i class="ti ti-chevron-right" style="font-size:17px;color:var(--ink-3)"></i></div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <div class="navb on" data-t="book"><i class="ti ti-home"></i><p>Book</p></div>
+    <div class="navb" data-t="track"><i class="ti ti-truck"></i><p>Track</p></div>
+    <div class="navb" data-t="jobs"><i class="ti ti-receipt"></i><p>Jobs</p></div>
+    <div class="navb" data-t="acct"><i class="ti ti-user"></i><p>Account</p></div>
+  </div>
+</div>
+
+<script>
+const BOOK_EMAIL="brayden@otsgroup.co.nz";
+const $=id=>document.getElementById(id);
+const machineName=()=>$("machine").value;
+const extrasList=()=>[...document.querySelectorAll("#extras .chip.on")].map(c=>c.textContent);
+
+const Z1=["albany","alfriston","arch hill","ardmore","avondale","balmoral","bayswater","beach haven","belmont","birkdale","birkenhead","blockhouse bay","botany downs","brookby","browns bay","bucklands beach","campbells bay","castor bay","chatswood","chelsea","cheltenham","clendon","clover park","cockle bay","conifer grove","crown hill","dannemora","dairy flat","devonport","drury","east coast bays","east tamaki","eastern beach","eden terrace","edgewater","ellerslie","epsom","farm cove","favona","flat bush","forrest hill","freemans bay","french bay","glen eden","glen innes","glendene","glendowie","glenfield","grafton","green bay","greenhithe","greenlane","greenwoods","grey lynn","half moon bay","hauraki","henderson","herald island","herne bay","highbury","highland park","hill park","hillcrest","hillsborough","hobsonville","homai","howick","hunters corner","kauri park","kelston","kingsland","kohimarama","konini","laingholm","lincoln","long bay","lynfield","manukau","manurewa","marlborough","massey","meadowbank","mellons bay","middlemore","milford","mission bay","morningside","mount albert","mount eden","mount roskill","mt albert","mt eden","mt roskill","mt wellington","mount wellington","murrays bay","narrow neck","new lynn","new windsor","newmarket","new market","newton","north harbour","north park","northcote","northcross","one tree hill","onehunga","orakei","oranga","oratia","otahuhu","otara","owairaka","pahurehure","pakuranga","panmure","papakura","papatoetoe","parnell","penrose","mairangi bay","mangere","point chevalier","pt chevalier","point england","ponsonby","puhinui","ranui","ramarama","red hill","remuera","rosebank","rosehill","rothesay bay","royal heights","royal oak","sandringham","shelly park","st heliers","saint heliers","st johns","saint johns","st lukes","saint lukes","st marys bay","stanley bay","sunnybrae","sunnyhills","sunnynook","sunnyvale","swanson","sylvia park","takanini","takapuna","tamaki","te atatu","te papapa","the gardens","the palms","three kings","titirangi","torbay","totara heights","unsworth heights","waiake","waikowhai","wairau park","waterview","whenuapai","wesley","west harbour","western springs","westlake","westmere","weymouth","whitford","wiri","karaka","hingaia","okura","auckland central","auckland cbd","city centre"];
+const Z2=["arkles bay","beachlands","big manly","bombay","clevedon","coatesville","gulf harbour","gulf habour","hatfields beach","hobbs bay","huia","kumeu","little huia","little manly","maraetai","matakatia bay","okoromai bay","orewa","paerata","paremoremo","pukekohe","red beach","red vale","riverhead","silverdale","stillwater","taupaki","te hihi","tindalls beach","waitakere township","whangaparaoa","drury south"];
+const CATS=[{max:4,lbl:"Cat 1 · 0–4 t"},{max:9,lbl:"Cat 2 · 4.1–9 t"},{max:12,lbl:"Cat 3 · 9.1–12 t"},{max:22,lbl:"Cat 4 · 12.1–22 t"},{max:24.5,lbl:"Cat 5 · 22.1–24.5 t"}];
+const RATES={z11:[162.45,231.39,268.79,348.25,449.94],z12:[251.27,307.36,409.03,543.42,659.12]};
+
+function catOf(w){for(let i=0;i<CATS.length;i++){if(w<=CATS[i].max)return i;}return -1;}
+function zoneOfText(str){
+  if(!str)return 0;
+  let s=str.toLowerCase().replace(/[^a-z\s]/g," ").replace(/\s+/g," ").trim();
+  s=s.replace(/\bauckland\b\s*$/,"").trim();
+  for(const z of Z2){if(s.includes(z))return 2;}
+  for(const z of Z1){if(s.includes(z))return 1;}
+  return 0;
+}
+function zoneOf(id){
+  const p=pts[id];
+  if(p&&p.suburb){const z=zoneOfText(p.suburb);if(z)return z;}
+  return zoneOfText($(id).value);
+}
+
+let manualMode=false;
+function quote(){
+  const w=+$("wt").value;
+  $("wt-out").textContent=(w%1?w.toFixed(1):w)+" t";
+  const zf=zoneOf("from"),zt=zoneOf("to");
+  const ci=catOf(w);
+  const price=$("price"),meta=$("qmeta"),note=$("qnote"),pill=$("zonepill"),gst=$("gstlbl"),btn=$("bookbtn");
+  note.style.display="none";
+  manualMode=false;
+
+  if(!zf||!zt){
+    meta.textContent="Instant quote";
+    price.textContent="—";gst.style.display="none";
+    pill.style.display="none";
+    note.textContent="Enter an Auckland pickup and dropoff to price this job.";
+    note.style.display="block";
+    btn.textContent="Book transport";
+    return null;
+  }
+  pill.style.display="inline-block";
+  pill.textContent="Zone "+zf+" → "+zt;
+
+  if(zf===2&&zt===2){
+    meta.textContent="Priced on application";
+    price.textContent="POA";gst.style.display="none";
+    pill.className="pill amber";
+    note.textContent="Zone 2 to Zone 2 is quoted manually — we'll confirm within the hour.";
+    note.style.display="block";
+    manualMode=true;
+    btn.textContent="Request quote";
+    return null;
+  }
+  if(ci<0){
+    meta.textContent="Over 24.5 tonne";
+    price.textContent="POA";gst.style.display="none";
+    pill.className="pill amber";
+    note.textContent="Heavy haulage over 24.5 t is quoted manually — we'll confirm within the hour.";
+    note.style.display="block";
+    manualMode=true;
+    btn.textContent="Request quote";
+    return null;
+  }
+  const table=(zf===1&&zt===1)?RATES.z11:RATES.z12;
+  const p=table[ci];
+  pill.className="pill teal";
+  meta.textContent="Instant quote · "+CATS[ci].lbl;
+  price.textContent="$"+p.toFixed(2);
+  gst.style.display="inline";
+  btn.textContent="Book transport";
+  return {p,w,ci,zf,zt};
+}
+$("machine").addEventListener("change",quote);
+document.querySelectorAll("#extras .chip").forEach(c=>c.addEventListener("click",()=>c.classList.toggle("on")));
+$("wt").addEventListener("input",quote);
+$("from").addEventListener("input",quote);
+$("to").addEventListener("input",quote);
+
+const pts={from:null,to:null};
+let debounce;
+function haversine(a,b){
+  const R=6371,rad=x=>x*Math.PI/180;
+  const dLat=rad(b.lat-a.lat),dLon=rad(b.lon-a.lon);
+  const h=Math.sin(dLat/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dLon/2)**2;
+  return 2*R*Math.asin(Math.sqrt(h));
+}
+async function autoDistance(){
+  quote();
+  if(!pts.from||!pts.to||!pts.from.lat||!pts.to.lat)return;
+  const info=$("route-info");
+  info.style.display="block";
+  info.textContent="Checking route…";
+  let km=null,mins=null;
+  try{
+    const u="https://router.project-osrm.org/route/v1/driving/"+pts.from.lon+","+pts.from.lat+";"+pts.to.lon+","+pts.to.lat+"?overview=false";
+    const r=await fetch(u);
+    const d=await r.json();
+    if(d.code==="Ok"&&d.routes&&d.routes[0]){
+      km=d.routes[0].distance/1000;
+      mins=Math.round(d.routes[0].duration/60);
+    }
+  }catch(e){}
+  if(km===null)km=haversine(pts.from,pts.to)*1.3;
+  info.textContent="Route: ~"+Math.round(km)+" km"+(mins?" · ~"+mins+" min drive":" (estimate)")+" — doesn't affect your zone price";
+}
+function titleCase(s){return s.replace(/\b\w/g,c=>c.toUpperCase());}
+function localMatches(q){
+  q=q.toLowerCase().replace(/,.*$/,"").trim();
+  if(!q)return[];
+  const hit=(list,zone)=>list.filter(s=>s.includes(q)).map(s=>({name:s,zone}));
+  const seen=new Set(),out=[];
+  for(const m of [...hit(Z1,1),...hit(Z2,2)]){
+    if(!seen.has(m.name)){seen.add(m.name);out.push(m);}
+  }
+  out.sort((a,b)=>(b.name.startsWith(q)?1:0)-(a.name.startsWith(q)?1:0));
+  return out.slice(0,4);
+}
+function renderLocal(id,box,inp,q){
+  const ms=localMatches(q);
+  box.innerHTML="";
+  ms.forEach(m=>{
+    const div=document.createElement("div");
+    div.innerHTML=titleCase(m.name)+'<span class="s2">Zone '+m.zone+' · Auckland</span>';
+    div.addEventListener("click",()=>{
+      inp.value=titleCase(m.name)+", Auckland";
+      pts[id]={suburb:m.name};
+      box.style.display="none";
+      quote();
+      geocodeForRoute(id,m.name);
+    });
+    box.appendChild(div);
+  });
+  box.style.display=ms.length?"block":"none";
+  return ms.length;
+}
+async function geocodeForRoute(id,suburb){
+  try{
+    const r=await fetch("https://photon.komoot.io/api/?q="+encodeURIComponent(suburb+" Auckland New Zealand")+"&limit=1");
+    const d=await r.json();
+    const f=(d.features||[])[0];
+    if(f&&pts[id]&&pts[id].suburb===suburb){
+      pts[id].lat=f.geometry.coordinates[1];
+      pts[id].lon=f.geometry.coordinates[0];
+      if(pts.from&&pts.from.lat&&pts.to&&pts.to.lat)autoDistance();
+    }
+  }catch(e){}
+}
+function wireAutocomplete(id){
+  const inp=$(id),box=$("sug-"+id);
+  inp.addEventListener("input",()=>{
+    pts[id]=null;
+    clearTimeout(debounce);
+    quote();
+    const q=inp.value.trim();
+    if(q.length<2){box.style.display="none";return;}
+    renderLocal(id,box,inp,q);
+    if(q.length<4)return;
+    debounce=setTimeout(async()=>{
+      try{
+        const r=await fetch("https://photon.komoot.io/api/?q="+encodeURIComponent(q)+"&lat=-36.85&lon=174.76&limit=6&lang=en");
+        const d=await r.json();
+        const feats=(d.features||[]).filter(f=>f.properties.countrycode==="NZ").slice(0,3);
+        if(!feats.length)return;
+        renderLocal(id,box,inp,inp.value.trim());
+        feats.forEach(f=>{
+          const p=f.properties;
+          const main=[p.housenumber,p.name||p.street].filter(Boolean).join(" ")||p.street||p.city||"";
+          const sub=[p.district||p.suburb,p.city,p.state].filter((v,i,a)=>v&&a.indexOf(v)===i).join(", ");
+          const div=document.createElement("div");
+          div.innerHTML=main+'<span class="s2">'+(sub||"New Zealand")+'</span>';
+          div.addEventListener("click",()=>{
+            inp.value=main+(sub?", "+sub.split(", ")[0]:"");
+            pts[id]={lat:f.geometry.coordinates[1],lon:f.geometry.coordinates[0],suburb:[p.suburb,p.district,p.city,p.name].filter(Boolean).join(" ")};
+            box.style.display="none";
+            quote();
+            autoDistance();
+          });
+          box.appendChild(div);
+        });
+        box.style.display="block";
+      }catch(e){}
+    },400);
+  });
+  inp.addEventListener("blur",()=>setTimeout(()=>box.style.display="none",200));
+}
+wireAutocomplete("from");
+wireAutocomplete("to");
+
+const screens={book:"scr-book",track:"scr-track",jobs:"scr-jobs",acct:"scr-acct"};
+function show(tab){
+  Object.entries(screens).forEach(([k,id])=>$(id).classList.toggle("on",k===tab));
+  document.querySelectorAll(".navb").forEach(b=>b.classList.toggle("on",b.dataset.t===tab));
+}
+document.querySelectorAll(".navb").forEach(b=>b.addEventListener("click",()=>show(b.dataset.t)));
+
+let stage=0, lastQuote="$0.00", lastRoute="";
+const badges=[["Finding truck","amber"],["Accepted","blue"],["Loading","blue"],["In transit","blue"],["Delivered","teal"]];
+function paintTrack(){
+  $("tk-bar").style.width=(5+stage*23.75)+"%";
+  const[b,cls]=badges[Math.min(stage,4)];
+  const badge=$("tk-badge");
+  badge.textContent=b;
+  badge.className="pill "+cls;
+  document.querySelectorAll("#tk-steps .step").forEach(s=>s.classList.toggle("done",+s.dataset.s<=stage));
+  $("tk-adv").style.display=stage>=4?"none":"block";
+  if(stage>=4){
+    const row=document.createElement("div");
+    row.className="jrow";
+    row.innerHTML='<div><h4>'+machineName().split(" /")[0]+' · '+lastRoute+'</h4><p>Today · '+lastQuote+' +GST</p></div><span class="pill teal">Done</span>';
+    $("jobs-list").prepend(row);
+    const jc=$("st-jobs");jc.textContent=+jc.textContent+1;
+  }
+}
+$("tk-adv").addEventListener("click",()=>{stage++;paintTrack();});
+
+let detailsOpen=false;
+function fieldOk(id){
+  const el=$(id),ok=el.value.trim().length>1;
+  el.classList.toggle("err",!ok);
+  return ok;
+}
+async function sendBooking(payload){
+  try{
+    const r=await fetch("https://formsubmit.co/ajax/"+BOOK_EMAIL,{
+      method:"POST",
+      headers:{"Content-Type":"application/json","Accept":"application/json"},
+      body:JSON.stringify(payload)
+    });
+    return r.ok;
+  }catch(e){return false;}
+}
+$("bookbtn").addEventListener("click",async()=>{
+  const q=quote();
+  const btn=$("bookbtn");
+  if(!q&&!manualMode)return;
+
+  if(!detailsOpen){
+    detailsOpen=true;
+    $("dform").classList.add("show");
+    btn.textContent=manualMode?"Send quote request":"Confirm booking";
+    $("dform").scrollIntoView({behavior:"smooth",block:"start"});
+    return;
+  }
+
+  const okN=fieldOk("c-name"),okP=fieldOk("c-phone"),okE=fieldOk("c-email");
+  if(!okN||!okP||!okE)return;
+
+  const w=+$("wt").value;
+  const payload={
+    _subject:(manualMode?"QUOTE REQUEST":"BOOKING")+" — "+machineName()+" · "+$("from").value+" → "+$("to").value,
+    type:manualMode?"Manual quote request":"Instant booking",
+    name:$("c-name").value.trim(),
+    phone:$("c-phone").value.trim(),
+    email:$("c-email").value.trim(),
+    machine:machineName(),
+    extras:extrasList().join(", ")||"None",
+    weight:(w%1?w.toFixed(1):w)+" t",
+    pickup:$("from").value,
+    dropoff:$("to").value,
+    zones:$("zonepill").textContent,
+    price:q?("$"+q.p.toFixed(2)+" +GST ("+CATS[q.ci].lbl+")"):"POA — manual quote",
+    notes:$("c-notes").value.trim()||"None"
+  };
+  btn.textContent="Sending…";
+  const sent=await sendBooking(payload);
+  if(!sent){
+    const body="New "+payload.type+"%0A%0A"+Object.entries(payload).filter(([k])=>k!=="_subject").map(([k,v])=>k+": "+v).join("%0A");
+    location.href="mailto:"+BOOK_EMAIL+"?subject="+encodeURIComponent(payload._subject)+"&body="+body;
+  }
+  const route=($("from").value.split(",")[0]||"Pickup")+" → "+($("to").value.split(",")[0]||"Dropoff");
+  if(manualMode){
+    btn.textContent="Quote request sent — we'll be in touch";
+    btn.style.background="#854F0B";
+    setTimeout(()=>{quote();btn.style.background="";$("dform").classList.remove("show");detailsOpen=false;},2200);
+    return;
+  }
+  lastQuote="$"+q.p.toFixed(2);
+  lastRoute=route;
+  $("tk-title").textContent=machineName().split(" /")[0]+" · "+payload.weight;
+  $("tk-route").textContent=route;
+  $("track-empty").style.display="none";
+  $("track-live").style.display="block";
+  stage=0;paintTrack();
+  btn.textContent="Booked";btn.style.background="#0F6E56";
+  setTimeout(()=>{quote();btn.textContent="Book transport";btn.style.background="";$("dform").classList.remove("show");detailsOpen=false;show("track");},900);
+});
+quote();
+</script>
+
+
+</body></html>
