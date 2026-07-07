@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0045)file:///C:/Users/brayden/Downloads/index.html -->
+<!-- saved from url=(0047)file:///C:/Users/brayden/Downloads/index_1.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -266,19 +266,20 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
           <div>
             <h4 style="margin:0;font-size:14.5px;font-weight:600" id="tk-title">Excavator · 14 t</h4>
             <p class="sub" id="tk-route" style="margin-top:2px">Mt Wellington → Drury South</p>
+            <p class="sub" id="tk-ref" style="margin-top:2px;font-weight:600"></p>
           </div>
-          <span class="pill amber" id="tk-badge">Finding truck</span>
+          <span class="pill amber" id="tk-badge">Received</span>
         </div>
         <div class="bar"><div id="tk-bar"></div></div>
       </div>
       <div style="margin-top:12px" id="tk-steps">
-        <div class="step done" data-s="0"><i class="ti ti-search"></i><div><h4>Matching operator</h4><p>Offering to nearby low loaders</p></div></div>
-        <div class="step" data-s="1"><i class="ti ti-user-check"></i><div><h4>Operator accepted</h4><p>Dave M · 4.9 ★ · Kenworth low loader</p></div></div>
-        <div class="step" data-s="2"><i class="ti ti-crane"></i><div><h4>Loading on site</h4><p>Photos added to job record</p></div></div>
-        <div class="step" data-s="3"><i class="ti ti-truck"></i><div><h4>In transit</h4><p>ETA 45 min · SH1 southbound</p></div></div>
-        <div class="step" data-s="4"><i class="ti ti-check"></i><div><h4>Delivered</h4><p>POD signed and emailed</p></div></div>
+        <div class="step done" data-s="0"><i class="ti ti-check"></i><div><h4>Booking received</h4><p>Locked in at your quoted price</p></div></div>
+        <div class="step" data-s="1"><i class="ti ti-user-check"></i><div><h4>Truck confirmed</h4><p>We match your job within the hour (business hours)</p></div></div>
+        <div class="step" data-s="2"><i class="ti ti-calendar-check"></i><div><h4>Pickup scheduled</h4><p>You'll get a text with your pickup window</p></div></div>
+        <div class="step" data-s="3"><i class="ti ti-truck"></i><div><h4>In transit</h4><p>Your gear is on the deck and moving</p></div></div>
+        <div class="step" data-s="4"><i class="ti ti-file-check"></i><div><h4>Delivered</h4><p>POD signed and emailed to you</p></div></div>
       </div>
-      <button class="ghost" id="tk-adv">Simulate next update</button>
+      <p class="sub" style="margin-top:10px">Questions about your booking? Reply to your confirmation email with your reference.</p>
     </div>
   </div>
 
@@ -525,24 +526,21 @@ function show(tab){
 document.querySelectorAll(".navb").forEach(b=>b.addEventListener("click",()=>show(b.dataset.t)));
 
 let stage=0, lastQuote="$0.00", lastRoute="";
-const badges=[["Finding truck","amber"],["Accepted","blue"],["Loading","blue"],["In transit","blue"],["Delivered","teal"]];
+const badges=[["Received","amber"],["Truck confirmed","blue"],["Scheduled","blue"],["In transit","blue"],["Delivered","teal"]];
 function paintTrack(){
-  $("tk-bar").style.width=(5+stage*23.75)+"%";
+  $("tk-bar").style.width=(12+stage*22)+"%";
   const[b,cls]=badges[Math.min(stage,4)];
   const badge=$("tk-badge");
   badge.textContent=b;
   badge.className="pill "+cls;
   document.querySelectorAll("#tk-steps .step").forEach(s=>s.classList.toggle("done",+s.dataset.s<=stage));
-  $("tk-adv").style.display=stage>=4?"none":"block";
-  if(stage>=4){
-    const row=document.createElement("div");
-    row.className="jrow";
-    row.innerHTML='<div><h4>'+machineName().split(" /")[0]+' · '+lastRoute+'</h4><p>Today · '+lastQuote+' +GST</p></div><span class="pill teal">Done</span>';
-    $("jobs-list").prepend(row);
-    const jc=$("st-jobs");jc.textContent=+jc.textContent+1;
-  }
 }
-$("tk-adv").addEventListener("click",()=>{stage++;paintTrack();});
+function makeRef(){
+  const c="ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+  let r="HW-";
+  for(let i=0;i<5;i++)r+=c[Math.floor(Math.random()*c.length)];
+  return r;
+}
 
 let detailsOpen=false;
 function fieldOk(id){
@@ -577,8 +575,12 @@ $("bookbtn").addEventListener("click",async()=>{
   if(!okN||!okP||!okE)return;
 
   const w=+$("wt").value;
+  const ref=makeRef();
+  const priceLine=q?("$"+q.p.toFixed(2)+" +GST ("+CATS[q.ci].lbl+")"):"POA — manual quote";
   const payload={
-    _subject:(manualMode?"QUOTE REQUEST":"BOOKING")+" — "+machineName()+" · "+$("from").value+" → "+$("to").value,
+    _subject:(manualMode?"QUOTE REQUEST":"BOOKING")+" "+ref+" — "+machineName()+" · "+$("from").value+" → "+$("to").value,
+    _autoresponse:"Kia ora "+$("c-name").value.trim()+",\n\nThanks for booking with Haulwell. Your "+(manualMode?"quote request":"booking")+" is locked in.\n\nReference: "+ref+"\nMachine: "+machineName()+($("c-make").value.trim()?" ("+$("c-make").value.trim()+")":"")+"\nWeight: "+(w%1?w.toFixed(1):w)+" t\nFrom: "+$("from").value+"\nTo: "+$("to").value+"\nPrice: "+priceLine+"\n\n"+(manualMode?"This job needs a manual quote — we'll come back to you within the hour (business hours) with a firm price.":"What happens next: we confirm your truck within the hour (business hours), then you'll get a text with your pickup window.")+"\n\nQuestions? Just reply to this email and quote your reference.\n\nHaulwell — machinery transport, priced instantly",
+    reference:ref,
     type:manualMode?"Manual quote request":"Instant booking",
     name:$("c-name").value.trim(),
     phone:$("c-phone").value.trim(),
@@ -590,7 +592,7 @@ $("bookbtn").addEventListener("click",async()=>{
     pickup:$("from").value,
     dropoff:$("to").value,
     zones:$("zonepill").textContent,
-    price:q?("$"+q.p.toFixed(2)+" +GST ("+CATS[q.ci].lbl+")"):"POA — manual quote",
+    price:priceLine,
     notes:$("c-notes").value.trim()||"None"
   };
   btn.textContent="Sending…";
@@ -610,9 +612,15 @@ $("bookbtn").addEventListener("click",async()=>{
   lastRoute=route;
   $("tk-title").textContent=machineName().split(" /")[0]+" · "+payload.weight;
   $("tk-route").textContent=route;
+  $("tk-ref").textContent="Ref "+ref;
   $("track-empty").style.display="none";
   $("track-live").style.display="block";
   stage=0;paintTrack();
+  const row=document.createElement("div");
+  row.className="jrow";
+  row.innerHTML='<div><h4>'+machineName().split(" /")[0]+' · '+route+'</h4><p>Today · '+lastQuote+' +GST · '+ref+'</p></div><span class="pill blue">Booked</span>';
+  $("jobs-list").prepend(row);
+  const jc=$("st-jobs");jc.textContent=+jc.textContent+1;
   btn.textContent="Booked";btn.style.background="#0F6E56";
   setTimeout(()=>{quote();btn.textContent="Book transport";btn.style.background="";$("dform").classList.remove("show");detailsOpen=false;show("track");},900);
 });
