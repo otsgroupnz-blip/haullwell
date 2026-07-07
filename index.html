@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0047)file:///C:/Users/brayden/Downloads/index_1.html -->
+<!-- saved from url=(0047)file:///C:/Users/brayden/Downloads/index_2.html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -294,12 +294,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
 
   <div class="screen" id="scr-acct">
     <h1>Account</h1>
-    <div class="card" style="display:flex;align-items:center;gap:12px">
+    <div class="card" id="acct-card" style="display:flex;align-items:center;gap:12px;cursor:pointer">
       <div class="avatar">BH</div>
-      <div>
+      <div style="flex:1">
         <h4 style="margin:0;font-size:15px;font-weight:600">Brayden Howell</h4>
         <p class="sub" style="margin-top:2px">Business account · on credit terms</p>
       </div>
+      <i class="ti ti-chevron-down" id="acct-chev" style="font-size:17px;color:var(--ink-3)"></i>
     </div>
     <div class="stats">
       <div class="stat"><p>Jobs this month</p><h3 id="st-jobs">4</h3></div>
@@ -309,6 +310,22 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
       <div class="jrow"><span style="font-size:14.5px"><i class="ti ti-credit-card" style="font-size:18px;vertical-align:-3px;margin-right:10px;color:var(--ink-2)"></i>Payment methods</span><i class="ti ti-chevron-right" style="font-size:17px;color:var(--ink-3)"></i></div>
       <div class="jrow"><span style="font-size:14.5px"><i class="ti ti-file-invoice" style="font-size:18px;vertical-align:-3px;margin-right:10px;color:var(--ink-2)"></i>Invoices and PODs</span><i class="ti ti-chevron-right" style="font-size:17px;color:var(--ink-3)"></i></div>
       <div class="jrow"><span style="font-size:14.5px"><i class="ti ti-headset" style="font-size:18px;vertical-align:-3px;margin-right:10px;color:var(--ink-2)"></i>Support</span><i class="ti ti-chevron-right" style="font-size:17px;color:var(--ink-3)"></i></div>
+    </div>
+
+    <div id="adm" style="display:none;margin-top:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h1 style="font-size:18px">Dispatch</h1>
+        <span style="display:flex;gap:8px">
+          <span class="chip" id="adm-done-toggle">Show completed</span>
+          <span class="chip" id="adm-refresh"><i class="ti ti-refresh" style="font-size:14px"></i></span>
+        </span>
+      </div>
+      <div id="adm-login" style="margin-top:8px">
+        <div class="frow"><label for="adm-key">Admin key</label><input id="adm-key" type="password" placeholder="Enter admin key"></div>
+        <button class="cta" id="adm-unlock" style="margin-top:10px;padding:13px">Unlock dispatch</button>
+        <p class="sub" id="adm-msg" style="margin-top:8px"></p>
+      </div>
+      <div id="adm-list" style="margin-top:4px"></div>
     </div>
   </div>
 
@@ -322,6 +339,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;heigh
 
 <script>
 const BOOK_EMAIL="brayden@otsgroup.co.nz";
+const SHEET_API="https://script.google.com/macros/s/AKfycbwkCcERy0fvsYBl6Tj2uFCQxNuMHeutoT0wnB0Cttsih98GzQzX3VGxJ-Dt6iJBU4UI/exec";
 const $=id=>document.getElementById(id);
 const machineName=()=>$("machine").value;
 const extrasList=()=>[...document.querySelectorAll("#extras .chip.on")].map(c=>c.textContent);
@@ -523,7 +541,7 @@ function show(tab){
   Object.entries(screens).forEach(([k,id])=>$(id).classList.toggle("on",k===tab));
   document.querySelectorAll(".navb").forEach(b=>b.classList.toggle("on",b.dataset.t===tab));
 }
-document.querySelectorAll(".navb").forEach(b=>b.addEventListener("click",()=>show(b.dataset.t)));
+document.querySelectorAll(".navb").forEach(b=>b.addEventListener("click",()=>{show(b.dataset.t);if(b.dataset.t==="track")refreshStatus();}));
 
 let stage=0, lastQuote="$0.00", lastRoute="";
 const badges=[["Received","amber"],["Truck confirmed","blue"],["Scheduled","blue"],["In transit","blue"],["Delivered","teal"]];
@@ -540,6 +558,32 @@ function makeRef(){
   let r="HW-";
   for(let i=0;i<5;i++)r+=c[Math.floor(Math.random()*c.length)];
   return r;
+}
+const STAGE_MAP={"Received":0,"Truck confirmed":1,"Pickup scheduled":2,"In transit":3,"Delivered":4};
+function saveJob(j){try{localStorage.setItem("hw_job",JSON.stringify(j));}catch(e){}}
+function loadJob(){try{return JSON.parse(localStorage.getItem("hw_job"));}catch(e){return null;}}
+function showJob(j){
+  $("tk-title").textContent=j.title;
+  $("tk-route").textContent=j.route;
+  $("tk-ref").textContent="Ref "+j.ref;
+  $("track-empty").style.display="none";
+  $("track-live").style.display="block";
+}
+async function refreshStatus(){
+  const j=loadJob();
+  if(!j)return;
+  showJob(j);
+  try{
+    const r=await fetch(SHEET_API+"?ref="+encodeURIComponent(j.ref));
+    const d=await r.json();
+    if(d.ok&&d.status){
+      if(d.status==="Cancelled"){
+        const badge=$("tk-badge");badge.textContent="Cancelled";badge.className="pill amber";
+        return;
+      }
+      if(d.status in STAGE_MAP){stage=STAGE_MAP[d.status];paintTrack();}
+    }
+  }catch(e){}
 }
 
 let detailsOpen=false;
@@ -596,6 +640,7 @@ $("bookbtn").addEventListener("click",async()=>{
     notes:$("c-notes").value.trim()||"None"
   };
   btn.textContent="Sending…";
+  fetch(SHEET_API,{method:"POST",body:JSON.stringify(payload)}).catch(()=>{});
   const sent=await sendBooking(payload);
   if(!sent){
     const body="New "+payload.type+"%0A%0A"+Object.entries(payload).filter(([k])=>k!=="_subject").map(([k,v])=>k+": "+v).join("%0A");
@@ -613,6 +658,7 @@ $("bookbtn").addEventListener("click",async()=>{
   $("tk-title").textContent=machineName().split(" /")[0]+" · "+payload.weight;
   $("tk-route").textContent=route;
   $("tk-ref").textContent="Ref "+ref;
+  saveJob({ref:ref,title:machineName().split(" /")[0]+" · "+payload.weight,route:route,price:lastQuote});
   $("track-empty").style.display="none";
   $("track-live").style.display="block";
   stage=0;paintTrack();
@@ -625,6 +671,88 @@ $("bookbtn").addEventListener("click",async()=>{
   setTimeout(()=>{quote();btn.textContent="Book transport";btn.style.background="";$("dform").classList.remove("show");detailsOpen=false;show("track");},900);
 });
 quote();
+refreshStatus();
+
+/* ===== Admin dispatch (behind account card) ===== */
+let admShowDone=false;
+const admKey=()=>{try{return localStorage.getItem("hw_admin_key")||"";}catch(e){return "";}};
+const PILL={"Received":"amber","Truck confirmed":"blue","Pickup scheduled":"blue","In transit":"blue","Delivered":"teal","Quote sent":"amber","Cancelled":"amber"};
+
+$("acct-card").addEventListener("click",()=>{
+  const adm=$("adm"),open=adm.style.display!=="none";
+  adm.style.display=open?"none":"block";
+  $("acct-chev").className=open?"ti ti-chevron-down":"ti ti-chevron-up";
+  if(!open){
+    if(admKey()){$("adm-login").style.display="none";admLoad();}
+    else{$("adm-login").style.display="block";}
+  }
+});
+$("adm-unlock").addEventListener("click",async()=>{
+  const k=$("adm-key").value.trim();
+  if(!k)return;
+  $("adm-msg").textContent="Checking…";
+  try{
+    const r=await fetch(SHEET_API+"?action=list&key="+encodeURIComponent(k));
+    const d=await r.json();
+    if(d.ok){
+      try{localStorage.setItem("hw_admin_key",k);}catch(e){}
+      $("adm-login").style.display="none";
+      $("adm-msg").textContent="";
+      renderAdm(d);
+    }else{$("adm-msg").textContent="Wrong key — try again.";}
+  }catch(e){$("adm-msg").textContent="Couldn't reach the backend — check your connection.";}
+});
+$("adm-refresh").addEventListener("click",admLoad);
+$("adm-done-toggle").addEventListener("click",()=>{
+  admShowDone=!admShowDone;
+  $("adm-done-toggle").classList.toggle("on",admShowDone);
+  admLoad();
+});
+async function admLoad(){
+  if(!admKey())return;
+  $("adm-list").innerHTML='<p class="sub" style="margin-top:10px">Loading jobs…</p>';
+  try{
+    const r=await fetch(SHEET_API+"?action=list&key="+encodeURIComponent(admKey()));
+    const d=await r.json();
+    if(d.ok)renderAdm(d);
+    else{
+      $("adm-list").innerHTML="";
+      $("adm-login").style.display="block";
+      $("adm-msg").textContent="Key no longer valid — log in again.";
+      try{localStorage.removeItem("hw_admin_key");}catch(e){}
+    }
+  }catch(e){$("adm-list").innerHTML='<p class="sub" style="margin-top:10px">Couldn\'t load jobs — check connection and try refresh.</p>';}
+}
+function renderAdm(d){
+  const done=["Delivered","Cancelled"];
+  const jobs=d.jobs.filter(j=>admShowDone||done.indexOf(j.status)===-1);
+  if(!jobs.length){$("adm-list").innerHTML='<p class="sub" style="margin-top:10px">No active jobs. Tap "Show completed" to see finished ones.</p>';return;}
+  $("adm-list").innerHTML="";
+  jobs.forEach(j=>{
+    const card=document.createElement("div");
+    card.className="card";
+    const chips=d.statuses.map(s=>'<span class="chip'+(s===j.status?" on":"")+'" data-ref="'+j.ref+'" data-s="'+s+'">'+s+'</span>').join("");
+    card.innerHTML=
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">'+
+      '<h4 style="margin:0;font-size:14px;font-weight:600">'+j.ref+' · '+(j.machine||"").split(" /")[0]+' · '+(j.weight||"")+'</h4>'+
+      '<span class="pill '+(PILL[j.status]||"amber")+'">'+j.status+'</span></div>'+
+      '<p class="sub" style="margin-top:4px">'+(j.pickup||"").split(",")[0]+' → '+(j.dropoff||"").split(",")[0]+' · '+(j.price||"")+'</p>'+
+      '<p class="sub" style="margin-top:2px">'+(j.name||"")+' · <a href="tel:'+(j.phone||"")+'" style="color:var(--red);text-decoration:none;font-weight:600">'+(j.phone||"")+'</a> · '+(j.date||"")+'</p>'+
+      ((j.make&&j.make!=="Not specified")||(j.extras&&j.extras!=="None")||(j.notes&&j.notes!=="None")?'<p class="sub" style="margin-top:2px">'+[j.make!=="Not specified"?j.make:"",j.extras!=="None"?j.extras:"",j.notes!=="None"?j.notes:""].filter(Boolean).join(" · ")+'</p>':"")+
+      '<div class="chips" style="margin-top:8px">'+chips+'</div>';
+    $("adm-list").appendChild(card);
+  });
+  document.querySelectorAll("#adm-list .chip").forEach(c=>c.addEventListener("click",async()=>{
+    const ref=c.dataset.ref,s=c.dataset.s;
+    c.style.opacity="0.5";
+    try{
+      const r=await fetch(SHEET_API+"?action=set&key="+encodeURIComponent(admKey())+"&ref="+encodeURIComponent(ref)+"&status="+encodeURIComponent(s));
+      const d2=await r.json();
+      if(d2.ok)admLoad();
+      else c.style.opacity="1";
+    }catch(e){c.style.opacity="1";}
+  }));
+}
 </script>
 
 
